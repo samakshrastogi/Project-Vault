@@ -1,0 +1,107 @@
+📌 *Quiz Platform – Final Requirements Document*
+
+🔹 *Quiz Types*
+
+* MCQ: single correct, multiple correct, partial scoring, negative marking
+* Subjective: text-based responses with AI-based evaluation
+
+🔹 *Submission & Evaluation*
+
+* Auto-submit after 10 minutes
+* Immediate result display post submission
+* Fully automated validation for MCQ and subjective responses
+
+🔹 *Quiz Generation & Flow*
+
+* Quizzes generated from admin-defined topics only
+* Single question view (one at a time)
+* Category-based filtering
+* Question navigation with progress tracking
+* Randomized questions and answer options
+
+🔹 *Attempt Management*
+
+* Timer-driven quiz execution
+* Auto-save of responses
+* Auto-submit on timer completion
+
+🔹 *Security & Integrity*
+
+* Auto-submit on browser close
+* Tab switch detection
+* Page refresh handling
+
+🔹 *Bulk Question Upload*
+
+* CSV-based upload
+* Data parsing and validation
+* Error handling and reporting
+* Duplicate detection
+
+🔹 *Result & Scoring System*
+
+* Weighted score calculation
+* Correct/incorrect analysis
+* Answer comparison with model solutions
+
+🔹 *Progress Tracking & Insights*
+
+* Daily tracking (attempts, accuracy, time spent, streaks)
+* Personalized performance dashboard
+
+🔹 *History & Analytics*
+
+* Attempt history with date-wise logs
+* Weak and strong topic identification
+* Category-wise accuracy
+* Time-per-question insights
+
+🔹 *Smart Learning Features*
+
+* Auto-generated quizzes based on weak areas
+* Review mode for incorrect responses
+
+🔹 *Question Features*
+
+* Multi-tagging system
+* Bookmarking capability
+* Notes per question
+
+🔹 *Admin Capabilities*
+
+* Admin-only quiz creation
+* Topic configuration for quiz generation
+* CSV upload and full question management
+* Edit, delete, bulk operations, and version control
+
+🔹 *Quiz Scheduling*
+
+* User-defined scheduling of quizzes
+
+🔹 *Notifications*
+
+* System notifications for users and admin
+* Alerts for quiz updates and completion
+
+🔹 *Data Management*
+
+* Backend database tracking for all activities
+
+🔹 *User Interface*
+
+* Dark mode support
+* Progress indicators
+* Smooth transitions
+* Responsive design
+* Keyboard shortcuts
+
+🔹 *Additional Capabilities*
+
+* Export results (PDF/CSV)
+* Share quiz results or links
+* Quiz modes: practice, exam, review
+* Offline quiz attempts with later synchronization
+
+---
+
+✅ This document outlines a complete, scalable, and production-ready quiz platform.

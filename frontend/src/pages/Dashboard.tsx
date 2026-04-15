@@ -29,6 +29,12 @@ export default function Dashboard() {
         category: "",
         visitLink: "",
     });
+    const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+    const [suggestionFormData, setSuggestionFormData] = useState({
+        category: "",
+        project: "",
+        suggestion: "",
+    });
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -59,7 +65,7 @@ export default function Dashboard() {
     const filteredProjects = useMemo(() => {
         return projects.filter(project => {
             const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                project.category.toLowerCase().includes(searchTerm.toLowerCase());
+                project.category.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === "" || project.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
@@ -117,6 +123,21 @@ export default function Dashboard() {
         }
     };
 
+    const handleSuggestionSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await api.post("/api/suggestions", suggestionFormData, {
+                headers: getAuthHeaders(),
+            });
+            setShowSuggestionModal(false);
+            setSuggestionFormData({ category: "", project: "", suggestion: "" });
+            alert("Suggestion submitted successfully!");
+        } catch (error) {
+            console.error("Error submitting suggestion:", error);
+            alert("Failed to submit suggestion. Please try again.");
+        }
+    };
+
     const normalizeUrl = (url: string) => {
         if (!url) return "";
         let normalized = url.trim();
@@ -151,6 +172,12 @@ export default function Dashboard() {
                                 Go to Admin Panel
                             </button>
                         )}
+                        <button
+                            onClick={() => setShowSuggestionModal(true)}
+                            className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded font-semibold"
+                        >
+                            Give Feedback
+                        </button>
                         <button
                             onClick={() => setShowAddModal(true)}
                             className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded font-semibold"
@@ -195,28 +222,29 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
                     {filteredProjects.map(project => (
                         <div key={project._id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg flex flex-col">
-                            <div className="aspect-video bg-gray-700 relative overflow-hidden rounded-t-lg border border-gray-700">
+                            <div className="aspect-video bg-gray-900 relative overflow-hidden rounded-t-lg border border-gray-700 group cursor-pointer">
                                 {project.visitLink ? (
-                                    <iframe
-                                        src={normalizeUrl(project.visitLink)}
-                                        title={project.name}
-                                        className="w-full h-full"
-                                        sandbox="allow-same-origin allow-scripts"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLIFrameElement;
-                                            target.style.display = "none";
-                                        }}
+                                    <img
+                                        src={`https://api.microlink.io/?url=${normalizeUrl(project.visitLink)}&screenshot=true&meta=false&embed=screenshot.url`}
+                                        alt={project.name}
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-gray-700">
                                         <span className="text-sm text-gray-400">No preview available</span>
                                     </div>
                                 )}
+
+                                {/* Gradient overlay like Image 1 */}
+                                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-80" />
+
+                                {/* Optional hover effect */}
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition" />
                             </div>
                             <div className="p-3 sm:p-4 grow flex flex-col">
                                 <h3 className="text-lg sm:text-xl font-semibold mb-2 truncate">{project.name}</h3>
                                 <p className="text-gray-400 mb-3">{project.category}</p>
-                                <div className="flex gap-2">
+                                <div className="flex justify-between items-center">
                                     <a
                                         href={project.visitLink}
                                         target="_blank"
@@ -225,6 +253,7 @@ export default function Dashboard() {
                                     >
                                         Visit
                                     </a>
+
                                     <button
                                         onClick={() => handleEdit(project)}
                                         className="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-sm font-semibold transition-colors transform hover:scale-105"
@@ -257,7 +286,7 @@ export default function Dashboard() {
                                         type="text"
                                         placeholder="Enter project name"
                                         value={formData.name}
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors"
                                         required
                                     />
@@ -268,7 +297,7 @@ export default function Dashboard() {
                                         type="text"
                                         placeholder="Enter category"
                                         value={formData.category}
-                                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                         className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors"
                                         required
                                     />
@@ -279,7 +308,7 @@ export default function Dashboard() {
                                         type="url"
                                         placeholder="https://example.com (optional)"
                                         value={formData.visitLink}
-                                        onChange={(e) => setFormData({...formData, visitLink: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, visitLink: e.target.value })}
                                         className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors"
                                     />
                                     {formData.visitLink && (
@@ -325,6 +354,91 @@ export default function Dashboard() {
                                             setShowAddModal(false);
                                             setEditingProject(null);
                                             setFormData({ name: "", category: "", visitLink: "" });
+                                        }}
+                                        className="bg-gray-600 hover:bg-gray-700 px-4 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Suggestions Modal */}
+                {showSuggestionModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                        <div className="bg-gray-800/50 backdrop-blur-lg p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-700">
+                            <h2 className="text-2xl font-bold mb-6 text-center bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                                Share Your Suggestions
+                            </h2>
+                            <form onSubmit={handleSuggestionSubmit} className="space-y-4">
+                                <div>
+                                    <label htmlFor="suggestion-category" className="block text-sm font-medium mb-2">Select Category</label>
+                                    <select
+                                        id="suggestion-category"
+                                        value={suggestionFormData.category}
+                                        onChange={(e) => {
+                                            setSuggestionFormData({
+                                                ...suggestionFormData,
+                                                category: e.target.value,
+                                                project: "", // Reset project when category changes
+                                            });
+                                        }}
+                                        className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 focus:border-purple-500 focus:outline-none transition-colors"
+                                        required
+                                    >
+                                        <option value="">Choose a category</option>
+                                        {categories.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="suggestion-project" className="block text-sm font-medium mb-2">Select Project</label>
+                                    <select
+                                        id="suggestion-project"
+                                        value={suggestionFormData.project}
+                                        onChange={(e) => setSuggestionFormData({ ...suggestionFormData, project: e.target.value })}
+                                        className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 focus:border-purple-500 focus:outline-none transition-colors"
+                                        required
+                                        disabled={!suggestionFormData.category}
+                                    >
+                                        <option value="">
+                                            {suggestionFormData.category ? "Choose a project" : "Select a category first"}
+                                        </option>
+                                        {projects
+                                            .filter(project => project.category === suggestionFormData.category)
+                                            .map(project => (
+                                                <option key={project._id} value={project._id}>{project.name}</option>
+                                            ))
+                                        }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="suggestion-text" className="block text-sm font-medium mb-2">Your Suggestions & Improvements</label>
+                                    <textarea
+                                        id="suggestion-text"
+                                        placeholder="Share your thoughts, suggestions, or improvements for this project..."
+                                        value={suggestionFormData.suggestion}
+                                        onChange={(e) => setSuggestionFormData({ ...suggestionFormData, suggestion: e.target.value })}
+                                        className="w-full p-3 rounded-lg bg-gray-700/50 border border-gray-600 focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                                        rows={6}
+                                        required
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="submit"
+                                        className="flex-1 bg-linear-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 p-3 rounded-lg font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed transform hover:scale-105"
+                                    >
+                                        Submit Suggestion
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowSuggestionModal(false);
+                                            setSuggestionFormData({ category: "", project: "", suggestion: "" });
                                         }}
                                         className="bg-gray-600 hover:bg-gray-700 px-4 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
                                     >

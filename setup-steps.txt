@@ -1,0 +1,166 @@
+mkdir sk-quiz
+cd sk-quiz
+mkdir backend
+cd backend
+npm init -y
+npm install express mongoose cors dotenv
+npm install -D typescript ts-node-dev @types/node @types/express
+npx tsc --init
+
+Replace tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+
+mkdir src
+cd src
+mkdir config 
+mkdir controllers 
+mkdir routes 
+mkdir models 
+mkdir middleware
+New-Item app.ts
+New-Item server.ts
+
+write below data in app.ts to check weather backend works
+import express from "express";
+import cors from "cors";
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.get("/", (req, res) => {
+  res.send("SK Quiz API Running 🚀");
+});
+
+export default app;
+
+
+
+add below data in server.ts
+import dotenv from "dotenv";
+import app from "./app";
+import { connectDB } from "./config/db";
+
+dotenv.config();
+
+// Connect DB
+connectDB();
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+
+
+replace scripts in package.json
+"scripts": {
+  "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+},
+
+now close the backend server and let's start connecting with mongo db 
+New-Item config/db.ts
+
+add below data in db.ts
+import mongoose from "mongoose";
+
+export const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI as string);
+        console.log("✅ MongoDB Connected");
+    } catch (error) {
+        console.error("❌ DB Error:", error);
+        process.exit(1);
+    }
+};
+
+https://cloud.mongodb.com/v2/69df74f00e448082b577d162#/overview
+create cluster and choose free plan
+enter your project name
+click deployment
+then save username and password
+after that create database user 
+choose drivers
+close srv connection string and copy the path and then enter your password in path
+after that paste in .env in Mongo_URI
+then go to left tab inside security>Database and network access>ip access list
+create new ip access list
+paste this ip 0.0.0.0/0 and add a comment that allow all and save 
+wait for 1 min to be active 
+
+
+Create file .env and paste below data
+PORT=5000
+MONGO_URI=your_connection_string
+
+now check that backend and db is connected
+npm run dev
+
+
+
+now let's connect frontend
+inside your project folder 
+npm create vite@latest frontend
+choose react > typescript > yes
+
+Ctrl + C
+close the react server
+cd frontend
+npm install
+npm install -D tailwindcss postcss autoprefixer
+
+add this in devDependencies in package.json
+"@tailwindcss/postcss": "^4.2.2",
+
+
+Create tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+
+
+Create postcss.config.js
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {},
+    autoprefixer: {},
+  },
+};
+
+
+Remove the data of index.css and app.css
+add in index.css @import "tailwindcss";
+replace all data in app.tsx
+export default function App() {
+  return (
+    <div className="h-screen flex items-center justify-center bg-black text-white">
+      <h1 className="text-4xl font-bold text-blue-500">
+        Tailwind Working 🚀
+      </h1>
+    </div>
+  );
+}
+
+now run frontend and check if it's working your setup is complete 
