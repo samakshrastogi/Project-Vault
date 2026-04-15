@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import axios from "axios";
+import { api } from "../api";
 
 interface LoginProps {
     switchToRegister: () => void;
@@ -38,10 +38,7 @@ export default function Login({ switchToRegister, switchToForgotPassword }: Logi
         setMessage("");
 
         try {
-            const { data } = await axios.post(
-                "http://localhost:5000/api/auth/login",
-                form
-            );
+            const { data } = await api.post("/api/auth/login", form);
 
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
@@ -59,12 +56,12 @@ export default function Login({ switchToRegister, switchToForgotPassword }: Logi
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-gray-800 p-6 rounded-xl w-full max-w-md shadow-lg"
+                className="bg-gray-800 p-6 sm:p-8 rounded-xl w-full max-w-md shadow-lg"
             >
-                <h2 className="text-2xl mb-4 font-bold text-center">Login</h2>
+                <h2 className="text-2xl sm:text-3xl mb-4 font-bold text-center">Login</h2>
 
                 <input
                     name="email"

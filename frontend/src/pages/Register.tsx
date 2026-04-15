@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import axios from "axios";
+import { api } from "../api";
 
 interface RegisterProps {
     switchToLogin: () => void;
@@ -40,27 +40,25 @@ export default function Register({ switchToLogin }: RegisterProps) {
         setMessage("");
 
         try {
-            const { data } = await axios.post(
-                "http://localhost:5000/api/auth/register",
-                form
-            );
+            const { data } = await api.post("/api/auth/register", form);
 
             setMessage(data.message);
             setForm({ name: "", email: "", password: "" });
-        } catch (err: any) {
-            setMessage(err.response?.data?.message || "Something went wrong");
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setMessage(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-gray-800 p-6 rounded-xl w-full max-w-md shadow-lg"
+                className="bg-gray-800 p-6 sm:p-8 rounded-xl w-full max-w-md shadow-lg"
             >
-                <h2 className="text-2xl mb-4 font-bold text-center">Register</h2>
+                <h2 className="text-2xl sm:text-3xl mb-4 font-bold text-center">Register</h2>
 
                 <input
                     name="name"

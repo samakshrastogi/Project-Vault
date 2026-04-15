@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import { api } from "../api";
 
 interface ForgotPasswordProps {
     switchToLogin: () => void;
@@ -24,8 +24,8 @@ export default function ForgotPassword({ switchToLogin }: ForgotPasswordProps) {
         setMessage("");
 
         try {
-            const { data } = await axios.post(
-                "http://localhost:5000/api/auth/forgot-password",
+            const { data } = await api.post(
+                "/api/auth/forgot-password",
                 { email }
             );
 
@@ -34,8 +34,9 @@ export default function ForgotPassword({ switchToLogin }: ForgotPasswordProps) {
                 setResetToken(data.resetToken);
                 setShowResetForm(true);
             }
-        } catch (err: any) {
-            setMessage(err.response?.data?.message || "Something went wrong");
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setMessage(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
@@ -52,15 +53,16 @@ export default function ForgotPassword({ switchToLogin }: ForgotPasswordProps) {
         setMessage("");
 
         try {
-            const { data } = await axios.post(
-                "http://localhost:5000/api/auth/reset-password",
+            const { data } = await api.post(
+                "/api/auth/reset-password",
                 { token: resetToken, newPassword }
             );
 
             setMessage(data.message);
             setTimeout(() => switchToLogin(), 2000);
-        } catch (err: any) {
-            setMessage(err.response?.data?.message || "Something went wrong");
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setMessage(error.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }

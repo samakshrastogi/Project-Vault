@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import { api, getAuthHeaders } from "../api";
 
 interface User {
     _id: string;
@@ -40,9 +40,8 @@ export default function Dashboard() {
 
     const fetchProjects = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const { data } = await axios.get("http://localhost:5000/api/projects", {
-                headers: { Authorization: `Bearer ${token}` },
+            const { data } = await api.get("/api/projects", {
+                headers: getAuthHeaders(),
             });
             setProjects(data);
         } catch (error) {
@@ -79,14 +78,13 @@ export default function Dashboard() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem("token");
             if (editingProject) {
-                await axios.put(`http://localhost:5000/api/projects/${editingProject._id}`, formData, {
-                    headers: { Authorization: `Bearer ${token}` },
+                await api.put(`/api/projects/${editingProject._id}`, formData, {
+                    headers: getAuthHeaders(),
                 });
             } else {
-                await axios.post("http://localhost:5000/api/projects", formData, {
-                    headers: { Authorization: `Bearer ${token}` },
+                await api.post("/api/projects", formData, {
+                    headers: getAuthHeaders(),
                 });
             }
             fetchProjects();
@@ -110,9 +108,8 @@ export default function Dashboard() {
 
     const handleDelete = async (id: string) => {
         try {
-            const token = localStorage.getItem("token");
-            await axios.delete(`http://localhost:5000/api/projects/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
+            await api.delete(`/api/projects/${id}`, {
+                headers: getAuthHeaders(),
             });
             fetchProjects();
         } catch (error) {
@@ -120,28 +117,28 @@ export default function Dashboard() {
         }
     };
 
-    const generateThumbnail = (url: string) => {
-        // Using ScreenshotOne API for automatic thumbnail generation
-        // Note: Using demo key - for production, get a proper API key
-        const apiUrl = `https://api.screenshotone.com/take?url=${encodeURIComponent(url)}&access_key=demo&viewport_width=1200&viewport_height=800&image_quality=80&format=jpg&cache=true&block_ads=true&block_cookie_banners=true&block_trackers=true`;
-
-        // Return the API URL - errors will be handled by onError handlers
-        return apiUrl;
+    const normalizeUrl = (url: string) => {
+        if (!url) return "";
+        let normalized = url.trim();
+        if (!/^https?:\/\//i.test(normalized)) {
+            normalized = `https://${normalized}`;
+        }
+        return normalized;
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-                <div>Loading...</div>
+            <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+                <div className="text-lg">Loading...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
+        <div className="min-h-screen bg-gray-900 text-white p-3 sm:p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
                     <h1 className="text-3xl font-bold">
                         Welcome, {user?.name || "User"} 👋
                     </h1>
@@ -170,13 +167,13 @@ export default function Dashboard() {
                 </div>
 
                 {/* Search and Filter */}
-                <div className="flex gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
                     <input
                         type="text"
                         placeholder="Search projects..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 p-2 rounded bg-gray-800 outline-none"
+                        className="flex-1 p-2 rounded bg-gray-800 outline-none text-sm"
                     />
                     <div>
                         <label htmlFor="category-filter" className="sr-only">Filter by category</label>
@@ -184,7 +181,7 @@ export default function Dashboard() {
                             id="category-filter"
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="p-2 rounded bg-gray-800 outline-none"
+                            className="p-2 rounded bg-gray-800 outline-none text-sm w-full sm:w-auto"
                         >
                             <option value="">All Categories</option>
                             {categories.map(cat => (
@@ -195,29 +192,29 @@ export default function Dashboard() {
                 </div>
 
                 {/* Projects Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
                     {filteredProjects.map(project => (
-                        <div key={project._id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-                            <div className="aspect-video bg-gray-700 relative overflow-hidden rounded-t-lg">
-                                <img
-                                    src={generateThumbnail(project.visitLink)}
-                                    alt={project.name}
-                                    className="w-full h-full object-cover transition-transform hover:scale-105"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.src = `data:image/svg+xml;base64,${btoa(`
-                                            <svg width="400" height="225" xmlns="http://www.w3.org/2000/svg">
-                                                <rect width="400" height="225" fill="#374151"/>
-                                                <text x="200" y="112" text-anchor="middle" fill="#9CA3AF" font-family="Arial, sans-serif" font-size="16" dy=".3em">${project.name}</text>
-                                            </svg>
-                                        `)}`;
-                                    }}
-                                    loading="lazy"
-                                />
-                                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity"></div>
+                        <div key={project._id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg flex flex-col">
+                            <div className="aspect-video bg-gray-700 relative overflow-hidden rounded-t-lg border border-gray-700">
+                                {project.visitLink ? (
+                                    <iframe
+                                        src={normalizeUrl(project.visitLink)}
+                                        title={project.name}
+                                        className="w-full h-full"
+                                        sandbox="allow-same-origin allow-scripts"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLIFrameElement;
+                                            target.style.display = "none";
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-700">
+                                        <span className="text-sm text-gray-400">No preview available</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="p-4">
-                                <h3 className="text-xl font-semibold mb-2">{project.name}</h3>
+                            <div className="p-3 sm:p-4 grow flex flex-col">
+                                <h3 className="text-lg sm:text-xl font-semibold mb-2 truncate">{project.name}</h3>
                                 <p className="text-gray-400 mb-3">{project.category}</p>
                                 <div className="flex gap-2">
                                     <a
@@ -288,20 +285,14 @@ export default function Dashboard() {
                                     {formData.visitLink && (
                                         <div className="mt-2 p-2 bg-gray-700/30 rounded-lg">
                                             <p className="text-xs text-gray-400 mb-1">Preview:</p>
-                                            <img
-                                                src={generateThumbnail(formData.visitLink)}
-                                                alt="Link preview"
-                                                className="w-full h-20 object-cover rounded"
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    target.src = `data:image/svg+xml;base64,${btoa(`
-                                                        <svg width="400" height="80" xmlns="http://www.w3.org/2000/svg">
-                                                            <rect width="400" height="80" fill="#374151"/>
-                                                            <text x="200" y="40" text-anchor="middle" fill="#9CA3AF" font-family="Arial, sans-serif" font-size="12" dy=".3em">Preview</text>
-                                                        </svg>
-                                                    `)}`;
-                                                }}
-                                            />
+                                            <div className="w-full h-20 rounded bg-gray-700 border border-gray-600">
+                                                <iframe
+                                                    src={normalizeUrl(formData.visitLink)}
+                                                    title="Link preview"
+                                                    className="w-full h-full rounded"
+                                                    sandbox="allow-same-origin"
+                                                />
+                                            </div>
                                         </div>
                                     )}
                                 </div>
