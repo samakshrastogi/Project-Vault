@@ -160,33 +160,40 @@ export default function Dashboard() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
-                    <h1 className="text-3xl font-bold">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
                         Welcome, {user?.name || "User"} 👋
                     </h1>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 w-full">
                         {user?.role === "ADMIN" && (
                             <button
                                 onClick={goToAdmin}
-                                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-semibold"
+                                aria-label="Go to Admin Panel"
+                                className="flex-1 min-w-[140px] text-center bg-blue-500 hover:bg-blue-600 px-3 sm:px-4 py-2 rounded font-semibold text-sm sm:text-base"
                             >
-                                Go to Admin Panel
+                                Admin Panel
                             </button>
                         )}
+
                         <button
                             onClick={() => setShowSuggestionModal(true)}
-                            className="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded font-semibold"
+                            aria-label="Give Suggestions"
+                            className="flex-1 min-w-[140px] text-center bg-purple-500 hover:bg-purple-600 px-3 sm:px-4 py-2 rounded font-semibold text-sm sm:text-base"
                         >
-                            Give Feedback
+                            Give Suggestions
                         </button>
+
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded font-semibold"
+                            aria-label="Add Project"
+                            className="flex-1 min-w-[140px] text-center bg-green-500 hover:bg-green-600 px-3 sm:px-4 py-2 rounded font-semibold text-sm sm:text-base"
                         >
                             Add Project
                         </button>
+
                         <button
                             onClick={handleLogout}
-                            className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-semibold"
+                            aria-label="Logout"
+                            className="flex-1 min-w-[140px] text-center bg-red-500 hover:bg-red-600 px-3 sm:px-4 py-2 rounded font-semibold text-sm sm:text-base"
                         >
                             Logout
                         </button>
@@ -194,32 +201,38 @@ export default function Dashboard() {
                 </div>
 
                 {/* Search and Filter */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+                <div className="flex flex-col md:flex-row gap-3 mb-6">
                     <input
                         type="text"
                         placeholder="Search projects..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 p-2 rounded bg-gray-800 outline-none text-sm"
+                        className="w-full md:flex-1 p-2 sm:p-3 rounded bg-gray-800 outline-none text-sm"
                     />
-                    <div>
-                        <label htmlFor="category-filter" className="sr-only">Filter by category</label>
+                    <div className="w-full md:w-56 relative">
+                        <label htmlFor="category-filter" className="sr-only">
+                            Filter by category
+                        </label>
+
                         <select
                             id="category-filter"
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="p-2 rounded bg-gray-800 outline-none text-sm w-full sm:w-auto"
+                            className="w-full p-2 sm:p-3 rounded bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
                         >
-                            <option value="">All Categories</option>
+                            <option value="" className="bg-gray-800 text-white">All Categories</option>
                             {categories.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
+                                <option key={cat} value={cat} className="bg-gray-800 text-white">
+                                    {cat}
+                                </option>
                             ))}
                         </select>
+
                     </div>
                 </div>
 
                 {/* Projects Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-8">
                     {filteredProjects.map(project => (
                         <div key={project._id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg flex flex-col">
                             <div className="aspect-video bg-gray-900 relative overflow-hidden rounded-t-lg border border-gray-700 group cursor-pointer">
@@ -242,21 +255,21 @@ export default function Dashboard() {
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition" />
                             </div>
                             <div className="p-3 sm:p-4 grow flex flex-col">
-                                <h3 className="text-lg sm:text-xl font-semibold mb-2 truncate">{project.name}</h3>
-                                <p className="text-gray-400 mb-3">{project.category}</p>
-                                <div className="flex justify-between items-center">
+                                <h3 className="text-base sm:text-lg font-semibold mb-2 truncate">{project.name}</h3>
+                                <p className="text-gray-400 mb-3 text-sm">{project.category}</p>
+                                <div className="flex flex-row sm:flex-row gap-2 sm:justify-between sm:items-center">
                                     <a
                                         href={project.visitLink}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm font-semibold transition-colors transform hover:scale-105"
+                                        className="w-full sm:w-auto text-center bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm font-semibold transition-colors"
                                     >
                                         Visit
                                     </a>
 
                                     <button
                                         onClick={() => handleEdit(project)}
-                                        className="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-sm font-semibold transition-colors transform hover:scale-105"
+                                        className="w-full sm:w-auto text-center bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-sm font-semibold transition-colors"
                                     >
                                         Edit
                                     </button>
@@ -275,7 +288,7 @@ export default function Dashboard() {
                 {/* Add/Edit Modal */}
                 {showAddModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className="bg-gray-800/50 backdrop-blur-lg p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-700">
+                        <div className="bg-gray-800/50 backdrop-blur-lg p-4 sm:p-6 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700">
                             <h2 className="text-2xl font-bold mb-6 text-center bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                                 {editingProject ? "Edit Project" : "Add New Project"}
                             </h2>
@@ -314,7 +327,7 @@ export default function Dashboard() {
                                     {formData.visitLink && (
                                         <div className="mt-2 p-2 bg-gray-700/30 rounded-lg">
                                             <p className="text-xs text-gray-400 mb-1">Preview:</p>
-                                            <div className="w-full h-20 rounded bg-gray-700 border border-gray-600">
+                                            <div className="w-full h-20 sm:h-24 rounded bg-gray-700 border border-gray-600 overflow-hidden">
                                                 <iframe
                                                     src={normalizeUrl(formData.visitLink)}
                                                     title="Link preview"
@@ -368,7 +381,7 @@ export default function Dashboard() {
                 {/* Suggestions Modal */}
                 {showSuggestionModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className="bg-gray-800/50 backdrop-blur-lg p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-700">
+                        <div className="bg-gray-800/50 backdrop-blur-lg p-4 sm:p-6 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700">
                             <h2 className="text-2xl font-bold mb-6 text-center bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                                 Share Your Suggestions
                             </h2>
