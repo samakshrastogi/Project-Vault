@@ -10,7 +10,7 @@ npx tsc --init
 Replace tsconfig.json
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES6",code cc
     "module": "commonjs",
     "rootDir": "./src",
     "outDir": "./dist",
@@ -72,7 +72,6 @@ replace scripts in package.json
   "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
 },
 
-now close the backend server and let's start connecting with mongo db 
 New-Item config/db.ts
 
 add below data in db.ts
@@ -88,11 +87,17 @@ export const connectDB = async () => {
     }
 };
 
+
+Create file .env and paste below data
+PORT=5000
+MONGO_URI=your_connection_string
+
+
 https://cloud.mongodb.com/v2/69df74f00e448082b577d162#/overview
 create cluster and choose free plan
 enter your project name
 click deployment
-then save username and password
+then save username and password rxboCCKiEnTvsehm samshop2310_db_user
 after that create database user 
 choose drivers
 close srv connection string and copy the path and then enter your password in path
@@ -103,11 +108,9 @@ paste this ip 0.0.0.0/0 and add a comment that allow all and save
 wait for 1 min to be active 
 
 
-Create file .env and paste below data
-PORT=5000
-MONGO_URI=your_connection_string
 
 now check that backend and db is connected
+cd ..
 npm run dev
 
 
@@ -122,6 +125,8 @@ close the react server
 cd frontend
 npm install
 npm install -D tailwindcss postcss autoprefixer
+npm install -D @tailwindcss/postcss
+
 
 add this in devDependencies in package.json
 "@tailwindcss/postcss": "^4.2.2",
@@ -164,3 +169,4 @@ export default function App() {
 }
 
 now run frontend and check if it's working your setup is complete 
+npm run dev
